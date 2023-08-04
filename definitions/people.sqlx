@@ -1,0 +1,22 @@
+config {
+    type: "incremental"
+}
+
+WITH
+  parameters AS (
+  SELECT
+    1000000 row_count,
+    DATE "2023-01-01" start_date,
+    CURRENT_DATE("US/Eastern") finish_date 
+    )
+SELECT
+  CAST(500*RAND() AS INT64) customer_id,
+  DATE_FROM_UNIX_DATE(CAST(start + (finish - start) * RAND() AS INT64)) created,
+  LOWER(REGEXP_REPLACE(TO_BASE64 (MD5(CAST (RAND() AS string))), r'\W', '')) firstName,
+  LOWER(REGEXP_REPLACE(TO_BASE64 (MD5(CAST (RAND() AS string))), r'\W', '')) last_name
+FROM
+  parameters,
+  UNNEST(GENERATE_ARRAY(1, row_count)) row_count,
+  UNNEST([STRUCT(UNIX_DATE(start_date) AS start,
+      UNIX_DATE(finish_date) AS finish)])
+${when(incremental(), `WHERE finish_date > (SELECT MAX(finish_date) FROM ${self()})`) }
