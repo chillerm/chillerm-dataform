@@ -1,5 +1,6 @@
 config {
-    type: "incremental"
+    type: "incremental",
+    uniqueKey: ["customer_id"]
 }
 
 WITH
@@ -11,7 +12,7 @@ WITH
     )
 SELECT
   CAST(500*RAND() AS INT64) customer_id,
-  DATE_FROM_UNIX_DATE(CAST(start + (finish - start) * RAND() AS INT64)) created,
+  DATE_FROM_UNIX_DATE(CAST(start + (finish - start) * RAND() AS INT64)) updated,
   LOWER(REGEXP_REPLACE(TO_BASE64 (MD5(CAST (RAND() AS string))), r'\W', '')) firstName,
   LOWER(REGEXP_REPLACE(TO_BASE64 (MD5(CAST (RAND() AS string))), r'\W', '')) last_name
 FROM
